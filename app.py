@@ -1,6 +1,6 @@
 import telebot
 from config import avaliable_currencies, TOKEN
-from utils import ConvertionException, CurrencyConverter
+from extensions import ConvertionException, APIException
 
 bot = telebot.TeleBot(TOKEN)
 
@@ -28,14 +28,14 @@ def convert(message: telebot.types.Message):
         if len(values) != 3:
                 raise ConvertionException("Кол-во вводимых параметров не равно трём!")
 
-        currency1, currency2, amount = values
-        exchange_value = CurrencyConverter.convert(currency1, currency2, amount)
+        base, quote, amount = values
+        exchange_value = APIException.get_price(base, quote, amount)
     except ConvertionException as exeption:
         bot.reply_to(message, f"Ошибка пользователя.\n{exeption}")
     except Exception as exeption:
         bot.reply_to(message, f"Не удалось обработать команду\n{exeption}")
     else:
-        output_text = f"Цена {amount} {currency1} в {currency2} = {exchange_value}"
+        output_text = f"Цена {amount} {base} в {quote} = {exchange_value}"
         bot.send_message(message.chat.id, output_text)
 
 bot.polling()
